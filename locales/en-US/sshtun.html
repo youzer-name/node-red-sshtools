@@ -1,0 +1,69 @@
+<!--
+	Copyright Tahd Dell 2020
+-->
+
+<script type="text/x-red" data-help-name="sshtun-in">
+	<p>A SSH Tunnel in node provides a choice of inputs. Can either connect to a remote 
+	TCP port, or accept incoming connections.</p>
+
+	<p>The output type can be a single message or a stream of data. When the single message 
+        is selected the node will wait for the client to disconnect before sending the message.</p>
+
+	<p>The output types can be a Buffer, String, or Base64 string. This will be what the
+        payload will be encoded as.</p>
+
+	<p>Details of about the client will be added as properties of the message.</p>
+
+	<p><b>Note: </b>On some systems you may need root or administorator access to ports
+	below 1024. Also some SSH servers will only allow binding reverse tunnels to 
+	localhost interfaces<p>
+</script>
+
+<script type="text/x-red" data-help-name="sshtun-out">
+	<p>A SSH Tunnel out node provides a choice of outputs. Can either connect to a remote
+	TCP port, or accept incoming connections.</p>
+
+	<p>Only the <code>msg.payload</code> is sent.</p>
+
+	<p>If <code>msg.payload</code> is a string containing Base64 encoding of binary data,
+	the Base64 decoding option will cause it to be converted back to binary before being
+	sent.</p>
+
+	<p>If <code>msg._session</code> is not present the payload is sent to <b>all</b>
+	connected streams under the control of the SSH Configuration Node (<code>ssh-conncfg</code>)</p>
+
+	<p><b>Note: </b>On some systems you may need root or administrator access to ports
+	below 1024. Also some SSH servers will only allow binding reverse tunnels to 
+	localhost interfaces</p> 
+</script>
+
+<script type="text/x-red" data-help-name="sshtun-req">
+	<p>A SSH Tunnel request node - sends the <code>msg.payload</code> to a
+	server tcp port and expects a response.</p>
+
+	<h3>Inputs</h3>
+	<dl class="message-properties">
+		<dt>payload <span class="property-type">string | buffer</span></dt>
+		<dd>The data send as part of the request.</dd>
+		<dt class="optional">host <span class="property-type">string</span></dt>
+		<dd>The hostname or IP address of the remote host to send the request.</dd>
+		<dt class="optional">port <span class="property-type">number</span></dt>
+		<dd>The port of the remote host to send the request.</dd>
+		<dt class="optional">disconnect <span class="property-type">boolean</span></dt>
+		<dd>A flag to tell the node to disconnect after sending payload.</dd>
+	</dl>
+	
+	<h3>Details</h3>
+        <p>Connects, sends the "request", and reads the "response". It can either 
+        count a number of returned characters into a fixed buffer, match a specified 
+        character before returning, wait a fixed timeout from first reply and then 
+        return, sit and wait for data, or send then close the connection immediately, 
+        without waiting for a reply.</p>
+        
+        <p>The response will be output in <code>msg.payload</code> as a buffer, so 
+        you may want to .toString() it.</p>
+        
+        <p>If you leave remote host or port blank they must be set by using the 
+        <code>msg.host</code> and <code>msg.port</code> properties in every message 
+        sent to the node.</p>
+</script>

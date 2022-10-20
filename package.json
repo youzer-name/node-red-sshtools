@@ -1,0 +1,39 @@
+{
+  "name": "@arcsoft/node-red-sshtools",
+  "version": "0.0.12",
+  "description": "A collection of Node-RED nodes for working with and controlling SSH connections",
+  "author": {
+    "name": "Tahd Dell",
+    "email": "vlagnar@gmail.com"
+  },
+  "homepage": "https://github.com/arcsoft-node-red/node-red-sshtools#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/arcsoft-node-red/node-red-sshtools.git"
+  },
+  "license": "MIT",
+  "keywords": [
+    "node-red",
+    "ssh",
+    "tunnel"
+  ],
+  "node-red": {
+    "version": ">=2.0.0",
+    "nodes": {
+      "sshconncfg": "sshconncfg.js",
+      "sshexec": "sshexec.js",
+      "sshfile": "sshfile.js",
+      "sshtun": "sshtun.js"
+    }
+  },
+  "bugs": {
+    "url": "https://github.com/arcsoft-node-red/node-red-sshtools/issues"
+  },
+  "engines": {
+    "node": ">=12.0.0"
+  },
+  "dependencies": {
+    "iconv-lite": "^0.6.3",
+    "ssh2": "^1.6.0"
+  }
+}

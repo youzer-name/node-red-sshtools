@@ -1,0 +1,378 @@
+<!--
+        Copyright Tahd Dell 2020
+-->
+
+<script type="text/javascript">
+	RED.nodes.registerType('sshtun-in', {
+		category: 'network',
+		color: '#F3B567',
+		defaults: {
+			name: { value: "" },
+ 			sshccfg: { type: "ssh-conncfg", required: true },
+			rtype: { value: "server", required: true },
+			host: { value: "", validate: function(v) { return (this.rtype == "server") || v.length > 0;} },
+			port: { value: "", required: true, validate: RED.validators.number() },
+			datamode: { value: "stream" },
+			datatype: { value: "buffer" },
+			newline: { value: "" },
+			topic: { value: "" },
+			tls: {type:"tls-config", value:'', required:false }
+		},
+		inputs: 0,
+		outputs: 1,
+		icon: "bridge-dash.svg",
+		label: function() { return this.name || "sshtun-in"; },
+		labelStyle: function() { return this.name?"node-label_italic":""; },
+		oneditprepare: function() {
+			var updateOptions = function() {
+				var sockettype = $("#node-input-rtype").val();
+				if (sockettype == "client") {
+					$("#node-input-host-row").show();
+				} else {
+					$("#node-input-host-row").hide();
+				}
+
+				var dmode = $("#node-input-datamode").val();
+				var dtype = $("#node-input-datatype").val();
+				if (dmode == "stream") {
+					if (dtype == "utf8") {
+						$("#node-row-newline").show();
+					} else {
+						$("#node-row-newline").hide();
+					}
+				} else {
+					$("#node-row-newline").hide();
+				}
+			};
+			updateOptions();
+			$("#node-input-rtype").change(updateOptions);
+			$("#node-input-datamode").change(updateOptions);
+			$("#node-input-datatype").change(updateOptions);
+			function updateTLSOptions() {
+				if ($("#node-input-usetls").is(':checked')) {
+					$("#node-row-tls").show();
+				} else {
+					$("#node-row-tls").hide();
+				}
+			}
+			if (this.tls) {
+				$('#node-input-usetls').prop('checked', true);
+			} else {
+				$('#node-input-usetls').prop('checked', false);
+			}
+			updateTLSOptions();
+			$("#node-input-usetls").on("click",function() {
+				updateTLSOptions();
+			});
+		},
+		oneditsave: function() {
+			if (!$("#node-input-usetls").is(':checked')) {
+				$("#node-input-tls").val("_ADD_");
+			}
+		}
+	});
+</script>
+
+<script type="text/x-red" data-template-name="sshtun-in">
+	<div class="form-row">
+        	<label for="node-input-sshccfg"><i class="fa fa-user"></i> <span data-i18n="sshtun.label.config"></span></label>
+        	<input type="text" id="node-input-sshccfg">
+	</div>
+	<div class="form-row">
+		<label for="node-input-rtype"><i class="fa fa-dot-circle-o"></i> <span data-i18n="sshtun.label.type"></span></label>
+		<select id="node-input-rtype" style="width:120px; margin-right:5px;">
+			<option value="server" data-i18n="sshtun.type.listen"></option>
+			<option value="client" data-i18n="sshtun.type.connect"></option>
+		</select>
+		<span data-i18n="sshtun.label.port"></span> <input type="text" id="node-input-port" style="width:65px">
+	</div>
+	<div class="form-row hidden" id="node-input-host-row" style="padding-left: 110px;">
+		<span data-i18n="sshtun.label.host"></span> <input type="text" id="node-input-host" style="width: 60%;">
+	</div>
+	<div class="form-row" id="node-input-tls-enable">
+        	<label> </label>
+        	<input type="checkbox" id="node-input-usetls" style="display: inline-block; width:auto; vertical-align:top;">
+        	<label for="node-input-usetls" style="width:auto" data-i18n="sshtun.use-tls"></label>
+        	<div id="node-row-tls" class="hide">
+        		<label style="width:auto; margin-left:20px; margin-right:10px;" for="node-input-tls"><span data-i18n="sshtun.tls-config"></span></label><input type="text" style="width: 300px" id="node-input-tls">
+        	</div>
+	</div>
+	<div class="form-row">
+		<label><i class="fa fa-sign-out"></i> <span data-i18n="sshtun.label.output"></span></label>
+		<select id="node-input-datamode" style="width:110px;">
+			<option value="stream" data-i18n="sshtun.output.stream"></option>
+			<option value="single" data-i18n="sshtun.output.single"></option>
+		</select>
+		<select id="node-input-datatype" style="width:140px;">
+			<option value="buffer" data-i18n="sshtun.output.buffer"></option>
+			<option value="utf8" data-i18n="sshtun.output.string"></option>
+			<option value="base64" data-i18n="sshtun.output.base64"></option>
+		</select>
+		<span data-i18n="sshtun.label.payload"></span>
+	</div>
+	<div class="form-row hidden" id="node-row-newline" style="padding-left:110px;">
+		<span data-i18n="sshtun.label.delimited"></span>
+		<input type="text" id="node-input-newline" style="width:110px;">
+	</div>
+	<div class="form-row">
+                <label for="node-input-topic"><i class="fa fa-tasks"></i> <span data-i18n="sshtun.label.topic"></span></label>
+                <input type="text" id="node-input-topic">
+	</div>
+        <div class="form-row">
+                <label for="node-input-name"><i class="fa fa-tag"></i> <span data-i18n="sshtun.label.name"></span></label>
+                <input type="text" id="node-input-name">
+        </div>
+</script>
+
+<script type="text/javascript">
+	RED.nodes.registerType('sshtun-out', {
+		category: 'network',
+		color: '#F3B567',
+		defaults: {
+			name: { value: "" },
+ 			sshccfg: { type: "ssh-conncfg", required: true },
+			rtype: { value: "client", required: true },
+			host: { value: "", validate: function(v) { return (this.rtype != "client")||v.length > 0;} },
+			port: { value: "", validate: function(v) { return (this.rtype == "reply")||RED.validators.number()(v); } },
+			end: { value: false, required: true },
+			base64: { value: false, required: true },
+			tls: {type:"tls-config", value:'', required:false }
+		},
+		inputs: 1,
+		outputs: 0,
+		icon: "bridge-dash.svg",
+		align: "right",
+		label: function() { return this.name || "sshtun-out"; },
+		labelStyle: function() { return this.name?"node-label_italic":""; },
+		oneditprepare: function() {
+			var updateOptions = function() {
+				var socktype = $("#node-input-rtype").val();
+				
+				if (socktype == "reply") {
+					$("#node-row-port").hide();
+                    			$("#node-row-host").hide();
+                    			$("#node-row-end").hide();
+					$("#node-input-tls-enable").hide();
+				} else if (socktype == "client") {
+					$("#node-row-port").show();
+                    			$("#node-row-host").show();
+                    			$("#node-row-end").show();
+					$("#node-input-tls-enable").show();
+				} else {
+					$("#node-row-port").show();
+                    			$("#node-row-host").hide();
+                    			$("#node-row-end").show();
+					$("#node-input-tls-enable").show();
+				}
+			};
+			updateOptions();
+			$("#node-input-rtype").change(updateOptions);
+
+			function updateTLSOptions() {
+				if ($("#node-input-usetls").is(':checked')) {
+					$("#node-row-tls").show();
+				} else {
+					$("#node-row-tls").hide();
+				}
+			}
+			if (this.tls) {
+				$('#node-input-usetls').prop('checked', true);
+			} else {
+				$('#node-input-usetls').prop('checked', false);
+			}
+			updateTLSOptions();
+			$("#node-input-usetls").on("click",function() {
+				updateTLSOptions();
+			});
+		},
+		oneditsave: function() {
+			if (!$("#node-input-usetls").is(':checked')) {
+				$("#node-input-tls").val("_ADD_");
+			}
+		}
+	});
+</script>
+
+<script type="text/x-red" data-template-name="sshtun-out">
+	<div class="form-row">
+        	<label for="node-input-sshccfg"><i class="fa fa-user"></i> <span data-i18n="sshtun.label.config"></span></label>
+        	<input type="text" id="node-input-sshccfg">
+	</div>
+	<div class="form-row">
+		<label for="node-input-rtype"><i class="fa fa-dot-circle-o"></i> <span data-i18n="sshtun.label.type"></span></label>
+		<select id="node-input-rtype" style="width:120px; margin-right:5px;">
+			<option value="server" data-i18n="sshtun.type.listen"></option>
+			<option value="client" data-i18n="sshtun.type.connect"></option>
+			<option value="reply" data-i18n="sshtun.type.reply"></option>
+		</select>
+		<span id="node-row-port"><span data-i18n="sshtun.label.port"></span> 
+		<input type="text" id="node-input-port" style="width:65px"></span>
+	</div>
+	<div class="form-row" id="node-row-host" style="padding-left: 110px;">
+		<span data-i18n="sshtun.label.host"></span> <input type="text" id="node-input-host" style="width: 60%;">
+	</div>
+	<div class="form-row" id="node-input-tls-enable">
+        	<label> </label>
+        	<input type="checkbox" id="node-input-usetls" style="display: inline-block; width: auto; vertical-align: top;">
+        	<label for="node-input-usetls" style="width: auto" data-i18n="sshtun.use-tls"></label>
+        	<div id="node-row-tls" class="hide">
+        		<label style="width: auto; margin-left: 20px; margin-right: 10px;" for="node-input-tls"><span data-i18n="sshtun.tls-config"></span></label>
+			<input type="text" style="width: 300px" id="node-input-tls">
+        	</div>
+	</div>
+
+	<div class="form-row hidden" id="node-row-end">
+		<label>&nbsp;</label>
+		<input type="checkbox" id="node-input-end" style="display: inline-block; width: auto; vertical-align: top;">
+		<label for="node-input-end" style="width: 70%;"><span data-i18n="sshtun.label.close-connection"></span></label>
+	</div>
+	<div class="form-row">
+		<label>&nbsp;</label>
+		<input type="checkbox" id="node-input-base64" style="display: inline-block; width: auto; vertical-align: top;">
+		<label for="node-input-base64" style="width: 70%;"><span data-i18n="sshtun.label.decode-base64"></span></label>
+	</div>
+        <div class="form-row">
+                <label for="node-input-name"><i class="fa fa-tag"></i> <span data-i18n="sshtun.label.name"></span></label>
+                <input type="text" id="node-input-name">
+        </div>
+</script>
+
+<script type="text/javascript">
+	RED.nodes.registerType('sshtun-req', {
+		category: 'network',
+		color: '#F3B567',
+		defaults: {
+			name: { value: "" },
+ 			sshccfg: { type: "ssh-conncfg", required: true },
+			server: { value: "" },
+			port: { value: "", required: true, validate: RED.validators.number()  },
+			out: { value: "time", required: true },
+			ret: { value: "buffer"},
+			splitc: { value: "0", required: true },
+			newline: {value: ""},
+			tls: {type:"tls-config", value:'', required:false }
+		},
+		inputs: 1,
+		outputs: 1,
+		icon: "bridge-dash.svg",
+		label: function() { return this.name || "sshtun-req"; },
+		labelStyle: function() { return this.name?"node-label_italic":""; },
+		oneditprepare: function() {
+			var previous = null;
+           		if ($("#node-input-ret").val() == undefined) {
+                		$("#node-input-ret").val("buffer");
+                		this.ret = "buffer";
+            		}
+            		$("#node-input-ret").on("change", function() {
+                		if ($("#node-input-ret").val() === "string" && 
+							$("#node-input-out").val() === "sit") { 
+					$("#node-row-newline").show(); }
+                		else { $("#node-row-newline").hide(); }
+            		});
+            		$("#node-input-out").on("change", function() {
+                		if ($("#node-input-ret").val() === "string" && 
+							$("#node-input-out").val() === "sit") { 
+					$("#node-row-newline").show(); }
+            			else { $("#node-row-newline").hide(); }
+            		});
+                        $("#node-input-out").on('focus', function () { 
+				previous = this.value; 
+			}).on("change", function() {
+				$("#node-input-splitc").show();
+				if (previous === null) { previous = $("#node-input-out").val(); }
+				switch($("#node-input-out").val()) {
+				case "char":
+					if (previous != "char") { $("#node-input-splitc").val("\\n"); }
+					$("#node-units").text("");
+				break;
+				case "time":
+					if (previous != "time") { $("#node-input-splitc").val("0"); }
+					$("#node-units").text(RED._("node-red:tcpin.label.ms"));
+				break;
+				case "immed":
+					if (previous != "immed") { $("#node-input-splitc").val(" "); }
+					$("#node-units").text("");
+					$("#node-input-splitc").hide();
+				break;
+				case "count":
+					if (previous != "count") { $("#node-input-splitc").val("12"); }
+					$("#node-units").text(RED._("node-red:tcpin.label.chars"));
+				break;
+				default:
+					if (previous != "sit") { $("#node-input-splitc").val(" "); }
+					$("#node-units").text("");
+					$("#node-input-splitc").hide();
+				}
+			});
+			function updateTLSOptions() {
+				if ($("#node-input-usetls").is(':checked')) {
+					$("#node-row-tls").show();
+				} else {
+					$("#node-row-tls").hide();
+				}
+			}
+			if (this.tls) {
+				$('#node-input-usetls').prop('checked', true);
+			} else {
+				$('#node-input-usetls').prop('checked', false);
+			}
+			updateTLSOptions();
+			$("#node-input-usetls").on("click",function() {
+				updateTLSOptions();
+			});
+		},
+		oneditsave: function() {
+			if (!$("#node-input-usetls").is(':checked')) {
+				$("#node-input-tls").val("_ADD_");
+			}
+		}
+	});
+</script>
+
+<script type="text/x-red" data-template-name="sshtun-req">
+	<div class="form-row">
+        	<label for="node-input-sshccfg"><i class="fa fa-user"></i> <span data-i18n="sshtun.label.config"></span></label>
+        	<input type="text" id="node-input-sshccfg">
+	</div>
+	<div class="form-row">
+        	<label for="node-input-server"><i class="fa fa-globe"></i> <span data-i18n="sshtun.label.server"></span></label>
+        	<input type="text" id="node-input-server" placeholder="ip.address" style="width:45%">
+        	<span data-i18n="sshtun.label.port"></span>
+        	<input type="text" id="node-input-port" style="width:60px">
+    	</div>
+	<div class="form-row" id="node-input-tls-enable">
+		<label> </label>
+		<input type="checkbox" id="node-input-usetls" style="display: inline-block; width: auto; vertical-align: top;">
+		<label for="node-input-usetls" style="width: auto" data-i18n="sshtun.use-tls"></label>
+        	<div id="node-row-tls" class="hide">
+        		<label style="width: auto; margin-left: 20px; margin-right: 10px;" for="node-input-tls"><span data-i18n="sshtun.tls-config"></span></label>
+			<input type="text" style="width: 300px" id="node-input-tls">
+        	</div>
+	</div>
+	<div class="form-row">
+		<label for="node-input-ret"><i class="fa fa-sign-out"></i> <span data-i18n="sshtun.label.return"></span></label>
+		<select type="text" id="node-input-ret" style="width:54%;">
+			<option value="buffer" data-i18n="sshtun.output.buffer"></option>
+			<option value="string" data-i18n="sshtun.output.string"></option>
+		</select>
+	</div>
+	<div class="form-row">
+		<label><i class="fa fa-sign-out fa-rotate-90"></i> <span data-i18n="sshtun.label.close"></span></label>
+		<select id="node-input-out" style="width:54%;">
+			<option value="time" data-i18n="sshtun.return.timeout"></option>
+			<option value="char" data-i18n="sshtun.return.character"></option>
+			<option value="count" data-i18n="sshtun.return.number"></option>
+			<option value="sit" data-i18n="sshtun.return.never"></option>
+			<option value="immed" data-i18n="sshtun.return.immed"></option>
+		</select>
+		<input type="text" id="node-input-splitc" style="width:50px;">
+		<span id="node-units"></span>
+	</div>
+	<div id="node-row-newline" class="form-row hidden" style="padding-left:162px;">
+		<span data-i18n="sshtun.label.delimited"></span> <input type="text" id="node-input-newline" style="width:110px;" data-i18n="[placeholder]sshtun.label.optional">
+	</div>
+        <div class="form-row">
+                <label for="node-input-name"><i class="fa fa-tag"></i> <span data-i18n="sshtun.label.name"></span></label>
+                <input type="text" id="node-input-name">
+        </div>
+</script>

@@ -1,0 +1,63 @@
+{
+    "sshfile": {
+        "label": {
+            "deletelabel": "delete __file__",
+            "read": "sshread",
+            "write": "sshwrite",
+            "utf8String": "UTF8 string",
+            "utf8String_plural": "UTF8 strings",
+            "binaryBuffer_plural": "binary buffers",
+            "binaryBuffer": "binary buffer",
+            "config": "SSH Config",
+            "filename": "Filename",
+            "action": "Action",
+            "output": "Output",
+            "addnewline": "Add newline (\\n) to each payload?",
+            "createdir": "Create directory if it doesn't exist?",
+            "encoding": "Encoding",
+            "name": "Name",
+            "allProps": "include all existing properties in each msg"
+        },
+        "action": {
+            "append": "append to file",
+            "overwrite": "overwrite file",
+            "delete": "delete file"
+        },
+        "output": {
+            "utf8": "a single utf8 string",
+            "lines": "a msg per line",
+            "buffer": "a single Buffer object",
+            "fstream": "a stream of Buffers"
+        },
+        "encoding": {
+            "none": "default",
+            "setbymsg": "set by msg.encoding",
+            "native": "Native",
+            "unicode": "Unicode",
+            "japanese": "Japanese",
+            "chinese": "Chinese",
+            "korean": "Korean",
+            "taiwan": "Taiwan/Hong Kong",
+            "windows": "Windows codepages",
+            "iso": "ISO codepages",
+            "ibm": "IBM codepages",
+            "mac": "Mac codepages",
+            "koi8": "KOI8 codepages",
+            "misc": "Miscellaneous"
+        },
+	"status": {
+	    "deletedfile": "deleted file: __file__"
+	},
+        "errors": {
+            "absolutepath": "Absolute path required.",
+            "nofilename": "No filename specified",
+            "deletefail": "failed to delete file: __error__",
+            "writefail": "failed to write to file: __error__",
+	    "createfail": "failed to create file: __error__",
+            "appendfail": "failed to append file: __error__"
+        },
+        "tips": {
+            "fileread": "Tip: The filename should be an absolute path, otherwise it will be relative to the working directory of the Node-RED process."
+        }
+    }
+}

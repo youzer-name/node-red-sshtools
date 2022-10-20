@@ -1,0 +1,35 @@
+<!--
+	Copyright Tahd Dell 2020
+-->
+
+<script type="text/x-red" data-help-name="ssh-conncfg">
+	<p>Configuration for a connection to an SSH Server.</p>
+
+	<p>This configuration will create a sinle connection to an SSH server which can then
+	be used by <code>SSHTun In</code>, <code>SSHTun Out</code> and <code>SSHTun Req</code>
+	nodes.</p>
+
+	<p>The node will open a SSH control connection that will be used to tunnel all the 
+	streams of data through.</p>
+
+	<h4>Host & Port</h4>
+	<p>This is the host/ip and the Port to which to authenticate with.</p>
+
+	<h4>Private Key Authentication</h4>
+	<p>A key file can be uploaded which will be used during the private key exchange
+	authentication process. If left blank this process will be ignored and account
+	authentication will need to be used. A field for a passphrase can be used if the 
+	key file provided has been password protected.</p>
+
+	<h4>Account Authentication</h4>
+	<p>The account authentication is used to provide username or password for the
+	remote user account that will be used to login. If left blank the private key
+	authentication will need to be used.</p>
+
+	<h4>Enable connection keep-alive</h4>
+	<p>When enabled the SSH-level keep-alive messages will be sent to the server/host.
+	The <b>interval</b> will be used to determine how often to send these messages.
+	While the <b>max count</b> will determine how many unanswered messages are sent
+	before the connection is terminated.</p>
+</script>
+

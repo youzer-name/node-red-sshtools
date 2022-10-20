@@ -1,0 +1,29 @@
+{
+    "sshexec": {
+        "label": {
+            "config": "SSH Config",
+            "command": "Command",
+            "append": "Append",
+            "output": "Output",
+            "timeout": "Timeout",
+            "seconds": "seconds",
+            "sigint": "Use pseudo-tty and SIGINT to terminate process",
+            "name": "Name",
+            "stdout": "stdout",
+            "stderr": "stderr",
+            "retcode": "return code",
+            "spawn": "spawn",
+            "exec": "exec",
+            "executing": "executing",
+            "killed": "killed"
+        },
+        "placeholder": {
+            "optional": "optional",
+            "extraparams": "extra input parameters"
+        },
+        "opt": {
+            "exec": "when the command is complete - exec mode",
+            "spawn": "while the command is running - spawn mode"
+        }
+    }
+}

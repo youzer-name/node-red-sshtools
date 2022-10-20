@@ -1,0 +1,145 @@
+<!--
+        Copyright Tahd Dell 2020
+-->
+
+<script type="text/javascript">
+        RED.nodes.registerType('ssh-conncfg', {
+                category: 'config',
+                defaults: {
+                        name: {value: ""},
+			sshhost: { value: "", required: true, validate: function(v) { return v.length > 0; } },
+			sshport: { value: "22", required: true, validate: RED.validators.number() },
+			key: { value: "" },
+			keyname: { value: ""},
+			persist: { value: false },
+			keeptime: { value: "0" },
+			keepcount: { value: "3" }
+                },
+		credentials: {
+			keydata: { type: "text" },
+			passphrase: { type: "password" },
+			userid: { type: "text" },
+			password: { type: "password" }
+		},
+		exportable: false,
+                label: function() { return this.name || "ssh-conncfg"; },
+		labelStyle: function() { return this.name?"node_label_italic":""; },
+		oneditprepare: function() {
+			var updateOptions = function() {
+				if ($("#node-config-input-persist").is(':checked')) {
+					$("#node-row-persist").show();
+				} else {
+					$("#node-row-persist").hide();
+					$("#node-config-input-keeptime").val("0");
+				}
+			};
+			$("#node-config-input-persist").change(updateOptions);
+
+			function saveFile(file) {
+				var dataInputId = "#node-config-input-keydata";
+				var filenameInputId = "#node-config-input-keyname";
+				var filename = file.name;
+				var reader = new FileReader();
+				reader.onload = function(event) {
+					$("#sshtools-config-keyname").text(filename);
+					$(filenameInputId).val(filename);
+					$(dataInputId).val(event.target.result);
+				}
+				reader.readAsText(file,"UTF-8");
+			}
+
+			$("#node-config-input-keyfile" ).on("change", function() {
+				saveFile(this.files[0]); 
+			});
+
+			$("#sshtools-config-button-key-clear").on("click", function() {
+				$("#sshtools-config-keyname").text("");
+				$("#node-config-input-keydata").val("");
+				$("#node-config-input-keyname").val("");
+				$("#node-config-input-passphrase").val("");
+
+			});
+
+			$("#sshtools-config-keyname").text(this.keyname);
+
+			updateOptions();
+		}
+        });
+</script>
+
+<script type="text/x-red" data-template-name="ssh-conncfg">
+        <div class="form-row">
+                <label for="node-config-input-name">
+			<i class="fa fa-tag"></i> <span data-i18n="sshconncfg.label.name"></span></label>
+                <input type="text" id="node-config-input-name">
+        </div>
+        <div class="form-row">
+                <label for="node-config-input-sshhost">
+			<i class="fa fa-globe"></i> <span data-i18n="sshconncfg.label.ssh-host"></span></label>
+                <input type="text" id="node-config-input-sshhost" style="width:40%;">
+		<label for="node-config-input-sshport" style="margin-left:20px;width:43px;">
+			<span data-i18n="sshconncfg.label.port"></span></label>
+		<input type="text" id="node-config-input-sshport" style="width:55px;">
+        </div>
+	<hr>
+	<div class="form-row">
+		<span style="width: 70%;" data-i18n="sshconncfg.label.prvkeyauth"></span>
+	</div>
+	<div style="margin-left: 20px" class="form-row">
+		<label style="width: 100px;">
+			<i class="fa fa-file-text-o"></i> <span data-i18n="sshconncfg.label.keyfile"></span></label>
+		<span class="sshtools-config-input-data">
+			<label class="red-ui-button" for="node-config-input-keyfile">
+				<i class="fa fa-upload"></i> <span data-i18n="sshconncfg.label.upload"></span></label>
+			<input class="hide" type="file" id="node-config-input-keyfile">
+			<span id="sshtools-config-keyname" style="width: calc(100% - 300px); 
+				overflow: hidden; 
+				line-height:34px; 
+				height:34px; 
+				text-overflow: ellipsis; 
+				white-space: nowrap; 
+				display: inline-block; 
+				vertical-align: middle;"> 
+			</span>
+			<button class="red-ui-button red-ui-button-small" 
+				id="sshtools-config-button-key-clear" 
+				style="margin-left: 10px"><i class="fa fa-times"></i></button>
+		</span>
+		<input type="hidden" id="node-config-input-keyname">
+		<input type="hidden" id="node-config-input-keydata">
+	</div>
+	<div style="margin-left: 20px" class="form-row">
+		<label for="node-config-input-passphrase"> <span data-i18n="sshconncfg.label.passphrase"></span></label>
+		<input type="password" id="node-config-input-passphrase" data-i18n="[placeholder]sshconncfg.label.prvkeypp">
+	</div>
+	<hr>
+	<div class="form-row">
+		<span style="width: 70%;" data-i18n="sshconncfg.label.accauth"></span>
+	</div>
+	<div style="margin-left: 20px" class="form-row">
+		<label for="node-config-input-userid">
+			<i class="fa fa-user"></i> <span data-i18n="sshconncfg.label.username"></span></label>
+		<input type="text" id="node-config-input-userid">
+	</div>
+	<div style="margin-left: 20px" class="form-row">
+		<label for="node-config-input-password">
+			<i class="fa fa-lock"></i> <span data-i18n="sshconncfg.label.password"></span></label>
+		<input type="password" id="node-config-input-password">
+	</div>
+	<hr>
+ 	<div class="form-row">
+		<input type="checkbox" id="node-config-input-persist" style="display: inline-block; width: auto; vertical-align: top;">
+        	<label for="node-config-input-persist" style="width: auto;"><span data-i18n="sshconncfg.label.keep-alive"></span></label>
+	</div>
+	<div style="margin-left: 20px" class="form-row hidden" id="node-row-persist">
+		<label for="node-config-input-keeptime">
+			<i class="fa fa-clock-o"></i> <span data-i18n="sshconncfg.label.interval"></span></label>
+		<input type="text" id="node-config-input-keeptime" style="width:90px;">
+		<label for="node-config-input-keepcount" style="margin-left:20px;">
+			<i class="fa fa-ellipsis-h"></i> <span data-i18n="sshconncfg.label.counter"></span></label>
+		<input type="text" id="node-config-input-keepcount" style="width:90px;">
+	</div>
+	<div class="form-tips">
+		<span data-i18n="sshconncfg.label.notetip"></span>
+	</div>
+</script>

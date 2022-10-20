@@ -1,0 +1,67 @@
+{
+	"sshtun": {
+		"use-tls": "Enable secure (SSL/TLS) connection",
+		"tls-config":"TLS Configuration",
+		"state": {
+			"connected": "Connected",
+			"connecting": "Connecting",
+			"disconnected": "Disconnected",
+			"initializing": "Initializing",
+			"failed": "Failed",
+			"error": "Error",
+			"connections": "__count__ connection",
+			"connections_plural": "__count__ connections"
+		},
+		"label": {
+			"config": "SSH Config",
+			"type": "Type",
+			"port": "port",
+			"host": "at host",
+			"output": "Output",
+			"server": "Server",
+			"payload": "payload(s)",
+			"delimited": "delimited by",
+			"optional": "optional",
+			"close": "Close",
+			"topic": "Topic",
+			"name": "Name",
+			"close-connection": "Close connection after each message is sent?",
+			"decode-base64": "Decode Base64 message?",
+			"remote-host": "Remote Host",
+			"return": "Return",
+			"ms": "ms",
+			"chars": "chars"
+		},
+		"type": {
+			"listen": "Listen on",
+			"connect": "Connect to",
+			"reply": "Reply to TCP"
+		},
+		"output": {
+			"stream": "stream of",
+			"single": "single",
+			"buffer": "Buffer",
+			"string": "String",
+			"base64": "Base64 String"
+		},
+		"return": {
+			"timeout": "after a fixed timeout of",
+			"character": "when character received is",
+			"number": "a fixed number of chars",
+			"never": "never - keep connection open",
+			"immed": "immediately - don't wait for reply"
+                },
+		"status": {
+			"create-tunnel": "Creating output tunnel to __host__:__port__",
+			"closing-tunnel": "Closing output tunnel to __host__:__port__",
+			"serving-tunnel": "Listening in with tunnel on port __port__",
+			"stopping-tunnel": "Stopping listening tunnel on port __port__"
+		},
+		"errors": {
+			"connection-reconnect": "Connection lost (__host__:__port__) - Reconnecting",
+			"failed-listening": "Failed to listen on port __port__",
+			"missingclient": "Client missing from active list (__host__:__port__)",
+			"bad-string": "failed to convert to string"
+		}
+	}
+}

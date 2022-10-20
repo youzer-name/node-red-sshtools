@@ -1,0 +1,21 @@
+{
+    "sshconncfg": {
+        "label": {
+            "name": "Name",
+            "ssh-host": "SSH Host",
+            "port": "port",
+            "prvkeyauth": "Private Key Authentication",
+            "keyfile": "Key File",
+            "upload": "Upload",
+            "passphrase": "Passphrase",
+            "prvkeypp": "private key passphrase (optional)",
+            "accauth": "Account Authentication",
+            "username": "Username",
+            "password": "Password",
+            "keep-alive": "Enable connection keep-alive",
+            "interval": "Interval (ms)",
+            "counter": "Max Counter",
+            "notetip": "Note: One or both of the authentication sections is required."
+        }
+    }
+}
