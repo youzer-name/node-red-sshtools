@@ -13,7 +13,8 @@
 			keyname: { value: ""},
 			persist: { value: false },
 			keeptime: { value: "0" },
-			keepcount: { value: "3" }
+			keepcount: { value: "3" },
+			logging: { value false }
                 },
 		credentials: {
 			keydata: { type: "text" },
@@ -139,6 +140,11 @@
 			<i class="fa fa-ellipsis-h"></i> <span data-i18n="sshconncfg.label.counter"></span></label>
 		<input type="text" id="node-config-input-keepcount" style="width:90px;">
 	</div>
+	<div class="form-row">
+		<input type="checkbox" id="node-config-input-logging" style="display: inline-block; width: auto; vertical-align: top;">
+        	<label for="node-config-input-logging" style="width: auto;"><span data-i18n="sshconncfg.label.logging"></span></label>
+	</div>
+
 	<div class="form-tips">
 		<span data-i18n="sshconncfg.label.notetip"></span>
 	</div>
