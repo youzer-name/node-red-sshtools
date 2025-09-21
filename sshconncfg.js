@@ -1,73 +1,96 @@
 module.exports = function(RED) {
-	"use strict";
-	const SSHTools = require('./sshtools');
+    "use strict";
+    const SSHTools = require('./sshtools');
 
-	let nrloglvl = RED.settings.logging.console.level;
+    function makeLogger(node, config) {
+        // Pull global console logging level from settings.js
+        const globalLevel = RED.settings.logging?.console?.level || "info";
 
-	function ssh_conncfg(config) {
-		RED.nodes.createNode(this, config);
-		let node = this;
-		let _sshobj = null;
+        // Effective behavior
+        const override = config.logLevel && config.logLevel.trim() !== "" ? config.logLevel : null;
 
-		let _logfcn = function(txt) { }
-		if (nrloglvl === "info" || nrloglvl === "debug" || nrloglvl === "trace") {
-			_logfcn = function(txt) { RED.log.info("["+node.name+":"+node.id+"] " + txt); }
-		}
+        return function _logfcn(msg) {
+            if (override === "none") {
+                // Explicitly disabled
+                return;
+            }
+            if (override === "info") {
+                // Always log as info
+                node.log(msg);
+                return;
+            }
 
-		let _sshconfig = {
-			host: config.sshhost,
-			port: config.sshport,
-			keepaliveInterval: config.keeptime,
-			keepaliveCountMax: config.keepcount,
-         		connLog: _logfcn
-		};
+            // Default: follow global Node-RED log level
+            const levels = ["fatal", "error", "warn", "info", "debug", "trace"];
+            if (levels.indexOf("info") <= levels.indexOf(globalLevel)) {
+                node.log(msg);
+            }
+        };
+    }
 
-		if (config.persist) {
-			_sshconfig.keepaliveInterval = config.keeptime;
-			_sshconfig.keepaliveCountMax = config.keepcount;
-		}
+    function ssh_conncfg(config) {
+        RED.nodes.createNode(this, config);
+        let node = this;
+        let _sshobj = null;
 
-		if (node.credentials) {
-			if (node.credentials.hasOwnProperty("keydata")) {
-				_sshconfig.privatekey = node.credentials.keydata;
-			}
+        // ✅ Create logger for this node
+        let _logfcn = makeLogger(node, config);
 
-			if (_sshconfig.privatekey && node.credentials.hasOwnProperty("passphrase")) {
-				_sshconfig.passphrase = node.credentials.passphrase;
-			}
+        let _sshconfig = {
+            host: config.sshhost,
+            port: config.sshport,
+            keepaliveInterval: config.keeptime,
+            keepaliveCountMax: config.keepcount,
+            connLog: _logfcn   // ✅ Pass in logger
+        };
 
-			if (node.credentials.hasOwnProperty("password")) {
-				_sshconfig.password = this.credentials.password;
-				_sshconfig.tryKeyboard = true;
-			}
+        if (config.persist) {
+            _sshconfig.keepaliveInterval = config.keeptime;
+            _sshconfig.keepaliveCountMax = config.keepcount;
+        }
 
-			if (_sshconfig.password && node.credentials.hasOwnProperty("userid")) {
-				_sshconfig.username = node.credentials.userid;
-			}
-		}
+        if (node.credentials) {
+            if (node.credentials.hasOwnProperty("keydata")) {
+                _sshconfig.privatekey = node.credentials.keydata;
+            }
 
-		try {
-			_sshobj = new SSHTools(_sshconfig);
+            if (_sshconfig.privatekey && node.credentials.hasOwnProperty("passphrase")) {
+                _sshconfig.passphrase = node.credentials.passphrase;
+            }
 
-			node.ssh_ctrl = function() { return _sshobj; }
+            if (node.credentials.hasOwnProperty("password")) {
+                _sshconfig.password = this.credentials.password;
+                _sshconfig.tryKeyboard = true;
+            }
 
-			node.on('close', function(done) {
-				node.ssh_ctrl().end(true);
-				done();
-			});
-		} catch(err) {
-			node.warn("ssh-conncfg: " + err);
-			if (node.ssh_ctrl()) {
-				node.ssh_ctrl().end();
-			}
-		}
-	};
-	RED.nodes.registerType("ssh-conncfg", ssh_conncfg, {
-                credentials: {
-                        keydata: { type: "text" },
-                        passphrase: { type: "password" },
-                        userid: { type: "text" },
-                        password: { type: "password" }
-                }
-	});
-}
+            if (_sshconfig.password && node.credentials.hasOwnProperty("userid")) {
+                _sshconfig.username = node.credentials.userid;
+            }
+        }
+
+        try {
+            _sshobj = new SSHTools(_sshconfig);
+
+            node.ssh_ctrl = function() { return _sshobj; };
+
+            node.on('close', function(done) {
+                node.ssh_ctrl().end(true);
+                done();
+            });
+        } catch(err) {
+            node.warn("ssh-conncfg: " + err);
+            if (node.ssh_ctrl()) {
+                node.ssh_ctrl().end();
+            }
+        }
+    }
+
+    RED.nodes.registerType("ssh-conncfg", ssh_conncfg, {
+        credentials: {
+            keydata: { type: "text" },
+            passphrase: { type: "password" },
+            userid: { type: "text" },
+            password: { type: "password" }
+        }
+    });
+};
