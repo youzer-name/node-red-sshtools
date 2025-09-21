@@ -14,7 +14,7 @@
 			persist: { value: false },
 			keeptime: { value: "0" },
 			keepcount: { value: "3" },
-			logLevel: {value:""}   // empty means "use global"
+			logLevel: {value:""}   
                 },
 		credentials: {
 			keydata: { type: "text" },
@@ -144,13 +144,9 @@
     	<label for="node-input-logLevel"><i class="fa fa-bug"></i> Log Level</label>
     	<select id="node-input-logLevel">
         	<option value="">(Use global)</option>
-    	    <option value="fatal">fatal</option>
-	        <option value="error">error</option>
-        	<option value="warn">warn</option>
-    	    <option value="info">info</option>
-	        <option value="debug">debug</option>
-        	<option value="trace">trace</option>
-    	</select>
+    	    <option value="info">Always log (info)</option>
+	        <option value="none">Disable logging</option>
+        </select>
 	</div>
 
 	<div class="form-tips">
