@@ -15,6 +15,7 @@
             "keep-alive": "Enable connection keep-alive",
             "interval": "Interval (ms)",
             "counter": "Max Counter",
+            "logging": "Log Connections?",
             "notetip": "Note: One or both of the authentication sections is required."
         }
     }
