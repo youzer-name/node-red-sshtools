@@ -14,7 +14,7 @@
 			persist: { value: false },
 			keeptime: { value: "0" },
 			keepcount: { value: "3" },
-			logging: { value false }
+			logLevel: {value:""}   // empty means "use global"
                 },
 		credentials: {
 			keydata: { type: "text" },
@@ -141,8 +141,16 @@
 		<input type="text" id="node-config-input-keepcount" style="width:90px;">
 	</div>
 	<div class="form-row">
-		<input type="checkbox" id="node-config-input-logging" style="display: inline-block; width: auto; vertical-align: top;">
-        	<label for="node-config-input-logging" style="width: auto;"><span data-i18n="sshconncfg.label.logging"></span></label>
+    	<label for="node-input-logLevel"><i class="fa fa-bug"></i> Log Level</label>
+    	<select id="node-input-logLevel">
+        	<option value="">(Use global)</option>
+    	    <option value="fatal">fatal</option>
+	        <option value="error">error</option>
+        	<option value="warn">warn</option>
+    	    <option value="info">info</option>
+	        <option value="debug">debug</option>
+        	<option value="trace">trace</option>
+    	</select>
 	</div>
 
 	<div class="form-tips">
