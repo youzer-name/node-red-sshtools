@@ -64,6 +64,12 @@
 			$("#sshtools-config-keyname").text(this.keyname);
 
 			updateOptions();
+
+			// ✅ Update logging dropdown default label to show global level
+			var globalLevel = RED.settings.logging && RED.settings.logging.console
+				? RED.settings.logging.console.level
+				: "info";
+			$("#node-input-logLevel option[value='']").text("(Use global: " + globalLevel + ")");
 		}
         });
 </script>
